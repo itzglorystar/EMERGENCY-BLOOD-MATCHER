@@ -7,10 +7,11 @@ export default function DonorProfile() {
   const { user, updateProfile, setAvailability } = useApp()
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState(user)
-  const canDonateAfter = useMemo(
-    () => addMonths((editing ? form.lastDonation : user.lastDonation) || '2025-02-12', 3),
-    [editing, form.lastDonation, user.lastDonation],
-  )
+  const canDonateAfter = useMemo(() => {
+    const last = editing ? form.lastDonation : user.lastDonation
+    if (last) return addMonths(last, 3)
+    return user.canDonateAfter || null
+  }, [editing, form.lastDonation, user.canDonateAfter, user.lastDonation])
 
   const save = (e) => {
     e.preventDefault()
@@ -98,8 +99,8 @@ export default function DonorProfile() {
           <div className="md:col-span-2">
             <label className="label">Can donate after</label>
             <div className="flex h-11 items-center rounded-xl bg-surface px-4 text-sm font-medium">
-              {formatLongDate(canDonateAfter)}
-              <span className="ml-2 text-xs text-muted">(last donation + 3 months)</span>
+              {formatLongDate(canDonateAfter) === '—' ? 'Eligible now' : formatLongDate(canDonateAfter)}
+              <span className="ml-2 text-xs text-muted">{canDonateAfter ? '(last donation + 3 months)' : '(no donation recorded yet)'}</span>
             </div>
           </div>
         </div>

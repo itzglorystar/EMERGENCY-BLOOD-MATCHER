@@ -2,11 +2,15 @@ import { Activity, Droplets, HeartHandshake, Users } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { StatCard, BloodBadge, StatusPill } from '../components/ui'
 import { useApp } from '../context/AppContext'
+import { totalUnits } from '../utils/roles'
 
 export default function Dashboard() {
-  const { requests, donations, matchingDonors, setCurrentRequestId } = useApp()
+  const { requests, donations, setCurrentRequestId } = useApp()
   const navigate = useNavigate()
-  const active = requests.filter((r) => r.status === 'Active' || r.status === 'Matched').length
+  const activeRequests = requests.filter((r) => r.status === 'Active' || r.status === 'Matched')
+  const active = activeRequests.length
+  const matchesFound = activeRequests.reduce((sum, request) => sum + Number(request.matchesFound || 0), 0)
+  const unitsGiven = totalUnits(donations)
 
   const openRequest = (id) => {
     setCurrentRequestId(id)
@@ -27,9 +31,9 @@ export default function Dashboard() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard icon={Activity} label="Active Requests" value={active} subtitle="Currently searching or matched" tone="red" />
-        <StatCard icon={Users} label="Matches Found" value={matchingDonors.length} subtitle="Compatible donors nearby" tone="blue" />
-        <StatCard icon={Droplets} label="Donations Made" value={donations.length} subtitle="Completed units given" tone="green" />
-        <StatCard icon={HeartHandshake} label="Lives Impacted" value={donations.length} subtitle="Patients reached through EBM" tone="amber" />
+        <StatCard icon={Users} label="Matches Found" value={matchesFound} subtitle="Compatible donors on live requests" tone="blue" />
+        <StatCard icon={Droplets} label="Donations Made" value={unitsGiven} subtitle="Completed units recorded" tone="green" />
+        <StatCard icon={HeartHandshake} label="Lives Impacted" value={unitsGiven} subtitle="Based on completed units" tone="amber" />
       </div>
 
       <section className="card overflow-hidden">

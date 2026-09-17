@@ -91,6 +91,7 @@ export function mapDonation(row) {
   return {
     id: row.id,
     ref: row.ref,
+    donatedOn: row.donated_on,
     date: formatLongDate(row.donated_on),
     bloodGroup: row.blood_group,
     units: row.units,

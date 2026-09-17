@@ -2,12 +2,21 @@ import { Activity, Calendar, Droplets, HeartHandshake } from 'lucide-react'
 import IncomingRequestCard from '../../components/IncomingRequestCard'
 import { BloodBadge, StatCard, StatusPill } from '../../components/ui'
 import { useApp } from '../../context/AppContext'
-import { addMonths, formatLongDate } from '../../utils/roles'
+import {
+  formatLongDate,
+  isOnOrBeforeToday,
+  latestDonationOn,
+  nextEligibleOn,
+  totalUnits,
+} from '../../utils/roles'
 
 export default function DonorDashboard() {
   const { user, donations, incomingRequests, setAvailability } = useApp()
   const available = user.available !== false
-  const nextEligible = formatLongDate(addMonths(user.lastDonation || '2025-02-12', 3))
+  const lastDonation = latestDonationOn(user, donations)
+  const nextEligibleDate = nextEligibleOn(user, lastDonation)
+  const eligibleNow = !nextEligibleDate || isOnOrBeforeToday(nextEligibleDate)
+  const unitsGiven = totalUnits(donations)
 
   return (
     <div className="space-y-6">
@@ -34,15 +43,27 @@ export default function DonorDashboard() {
           <div>
             <p className="text-sm font-medium text-muted">Blood Group</p>
             <div className="mt-2">
-              <BloodBadge type={user.bloodGroup} size="lg" />
+              <BloodBadge type={user.bloodGroup || '—'} size="lg" />
             </div>
           </div>
           <Droplets className="h-5 w-5 text-ebm-700" />
         </div>
-        <StatCard icon={Droplets} label="Total Donations" value={donations.length} subtitle="Completed units given" tone="green" />
-        <StatCard icon={HeartHandshake} label="Lives Impacted" value={donations.length} subtitle="Patients reached through EBM" tone="amber" />
-        <StatCard icon={Calendar} label="Last Donation" value={formatLongDate(user.lastDonation)} subtitle="Most recent unit" tone="blue" />
-        <StatCard icon={Activity} label="Next Eligible" value={nextEligible} subtitle="Last donation + 3 months" tone="red" />
+        <StatCard icon={Droplets} label="Total Donations" value={unitsGiven} subtitle={unitsGiven === 1 ? 'Unit recorded' : 'Units recorded'} tone="green" />
+        <StatCard icon={HeartHandshake} label="Lives Impacted" value={unitsGiven} subtitle="Based on units you have given" tone="amber" />
+        <StatCard
+          icon={Calendar}
+          label="Last Donation"
+          value={formatLongDate(lastDonation)}
+          subtitle={lastDonation ? 'Most recent unit' : 'No donation recorded yet'}
+          tone="blue"
+        />
+        <StatCard
+          icon={Activity}
+          label="Next Eligible"
+          value={eligibleNow ? 'Eligible now' : formatLongDate(nextEligibleDate)}
+          subtitle={lastDonation ? 'Last donation + 3 months' : 'No waiting period yet'}
+          tone="red"
+        />
       </div>
 
       <section>
@@ -75,16 +96,24 @@ export default function DonorDashboard() {
               </tr>
             </thead>
             <tbody>
-              {donations.map((d) => (
-                <tr key={d.ref} className="border-t border-black/5">
-                  <td className="px-5 py-3 font-mono text-xs font-semibold">{d.ref}</td>
-                  <td className="px-5 py-3">{d.date}</td>
-                  <td className="px-5 py-3"><BloodBadge type={d.bloodGroup} size="sm" /></td>
-                  <td className="px-5 py-3">{d.units}</td>
-                  <td className="px-5 py-3">{d.hospital}</td>
-                  <td className="px-5 py-3"><StatusPill status={d.status} /></td>
+              {donations.length === 0 ? (
+                <tr>
+                  <td className="px-5 py-8 text-center text-sm text-muted" colSpan={6}>
+                    No donations recorded yet.
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                donations.map((d) => (
+                  <tr key={d.ref} className="border-t border-black/5">
+                    <td className="px-5 py-3 font-mono text-xs font-semibold">{d.ref}</td>
+                    <td className="px-5 py-3">{d.date}</td>
+                    <td className="px-5 py-3"><BloodBadge type={d.bloodGroup} size="sm" /></td>
+                    <td className="px-5 py-3">{d.units}</td>
+                    <td className="px-5 py-3">{d.hospital}</td>
+                    <td className="px-5 py-3"><StatusPill status={d.status} /></td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
