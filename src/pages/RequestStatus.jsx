@@ -85,7 +85,7 @@ export default function RequestStatus() {
         <div className="flex items-center justify-between border-b border-black/5 px-6 py-4">
           <h2 className="font-bold">Live map</h2>
           <p className="flex items-center gap-1 text-xs text-muted">
-            <MapPin className="h-3.5 w-3.5" /> Yaoundé, Cameroon
+            <MapPin className="h-3.5 w-3.5" /> {req?.hospitalLocation || 'Cameroon'}
           </p>
         </div>
         <div className="relative h-80 bg-[#d7e4d2]">

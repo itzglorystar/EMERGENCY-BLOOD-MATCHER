@@ -22,7 +22,7 @@ export default function Dashboard() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="page-title">Dashboard</h1>
-          <p className="mt-1 text-sm text-muted">Your emergency matching overview for Yaoundé.</p>
+          <p className="mt-1 text-sm text-muted">Your emergency matching overview across Cameroon.</p>
         </div>
         <Link to="/request" className="btn-primary">
           Request Blood

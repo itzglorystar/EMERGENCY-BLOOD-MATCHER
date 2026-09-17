@@ -46,7 +46,7 @@ export default function AdminDashboard() {
               <div key={hospital.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="font-semibold">{hospital.fullName}</p>
-                  <p className="text-sm text-muted">{hospital.email} · {hospital.city || 'Yaoundé'}</p>
+                  <p className="text-sm text-muted">{hospital.email} · {hospital.city || 'Cameroon'}</p>
                   <p className="mt-1 text-xs text-muted">Submitted {relativeTime(hospital.createdAt) || formatLongDate(hospital.createdAt)}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">

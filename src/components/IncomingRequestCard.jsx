@@ -35,7 +35,7 @@ export default function IncomingRequestCard({ request }) {
 
       {accepted ? (
         <div className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm">
-          <p className="font-semibold text-emerald-800">Requester contact</p>
+          <p className="font-semibold text-emerald-800">Hospital contact</p>
           <p className="mt-1 flex items-center gap-2 text-emerald-900">
             <Phone className="h-4 w-4" />
             {request.hospitalContact}

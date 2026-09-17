@@ -1,3 +1,5 @@
+import { CAMEROON_CITIES } from '../data/constants'
+
 export function BloodBadge({ type, size = 'md' }) {
   const sizes = {
     sm: 'h-7 min-w-7 px-1.5 text-[11px]',
@@ -101,5 +103,28 @@ export function BloodDropLogo({ className = 'h-10 w-10' }) {
         className="text-white"
       />
     </svg>
+  )
+}
+
+export function CityInput({ id = 'city', value, onChange, required = false, placeholder = 'Any city in Cameroon' }) {
+  const listId = `${id}-cameroon-cities`
+  return (
+    <>
+      <input
+        id={id}
+        className="input"
+        list={listId}
+        value={value ?? ''}
+        onChange={onChange}
+        required={required}
+        placeholder={placeholder}
+        autoComplete="address-level2"
+      />
+      <datalist id={listId}>
+        {CAMEROON_CITIES.map((city) => (
+          <option key={city} value={city} />
+        ))}
+      </datalist>
+    </>
   )
 }

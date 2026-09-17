@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Avatar } from '../components/ui'
+import { Avatar, CityInput } from '../components/ui'
 import { useApp } from '../context/AppContext'
 
 export default function Profile() {
@@ -17,6 +17,7 @@ export default function Profile() {
     ['fullName', 'Hospital Name'],
     ['email', 'Email'],
     ['phone', 'Phone'],
+    ['city', 'City'],
     ['address', 'Address'],
     ['emergencyContact', 'Emergency Contact'],
   ]
@@ -38,7 +39,7 @@ export default function Profile() {
           <div>
             <p className="text-xl font-bold">{user.fullName}</p>
             <p className="text-sm text-muted">{user.email}</p>
-            <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-ebm-700">Hospital / Requester</p>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-ebm-700">Hospital</p>
           </div>
         </div>
         <div className="grid gap-5 md:grid-cols-2">
@@ -46,14 +47,18 @@ export default function Profile() {
             <div key={key} className={key === 'address' || key === 'fullName' ? 'md:col-span-2' : ''}>
               <label className="label">{label}</label>
               {editing ? (
-                <input
-                  className="input"
-                  value={form[key] ?? ''}
-                  onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                />
+                key === 'city' ? (
+                  <CityInput value={form[key] ?? ''} onChange={(e) => setForm({ ...form, [key]: e.target.value })} />
+                ) : (
+                  <input
+                    className="input"
+                    value={form[key] ?? ''}
+                    onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                  />
+                )
               ) : (
                 <div className="flex min-h-11 items-center rounded-xl bg-surface px-4 text-sm font-medium">
-                  {user[key]}
+                  {user[key] || '—'}
                 </div>
               )}
             </div>

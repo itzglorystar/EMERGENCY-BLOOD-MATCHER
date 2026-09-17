@@ -102,7 +102,7 @@ export default function AdminUsers() {
                     <td className="px-5 py-4">
                       {user.bloodGroup ? <BloodBadge type={user.bloodGroup} size="sm" /> : '—'}
                     </td>
-                    <td className="px-5 py-4">{user.city || 'Yaoundé'}</td>
+                    <td className="px-5 py-4">{user.city || '—'}</td>
                     <td className="px-5 py-4">{donationCountByDonor[user.id] || 0}</td>
                     <td className="px-5 py-4 text-muted">{relativeTime(user.createdAt) || formatLongDate(user.createdAt)}</td>
                     <td className="px-5 py-4">

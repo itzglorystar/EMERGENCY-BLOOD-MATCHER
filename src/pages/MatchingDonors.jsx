@@ -13,7 +13,7 @@ export default function MatchingDonors() {
         <div>
           <h1 className="page-title">Matching Donors Found ({matchingDonors.length})</h1>
           <p className="mt-1 text-sm text-muted">
-            Compatible {currentRequest?.bloodGroup} donors near {currentRequest?.hospital || 'Yaoundé'}.
+            Compatible {currentRequest?.bloodGroup} donors near {currentRequest?.hospitalLocation || currentRequest?.hospital || 'your city'}.
           </p>
         </div>
         <button type="button" className="btn-outline" onClick={() => navigate('/request')}>

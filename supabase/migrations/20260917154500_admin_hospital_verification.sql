@@ -124,7 +124,7 @@ begin
     new.raw_user_meta_data->>'phone',
     nullif(new.raw_user_meta_data->>'blood_group', ''),
     new.raw_user_meta_data->>'gender',
-    coalesce(nullif(new.raw_user_meta_data->>'city', ''), 'Yaoundé'),
+    nullif(new.raw_user_meta_data->>'city', ''),
     nullif(new.raw_user_meta_data->>'address', ''),
     true,
     chosen_status

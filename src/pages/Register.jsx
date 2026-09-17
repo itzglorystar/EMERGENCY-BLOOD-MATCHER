@@ -5,6 +5,7 @@ import WelcomeSlider from '../components/WelcomeSlider'
 import { BLOOD_GROUPS } from '../data/constants'
 import { useApp } from '../context/AppContext'
 import { homePath } from '../utils/roles'
+import { CityInput } from '../components/ui'
 
 export default function Register() {
   const { isAuthenticated, authLoading, user, register } = useApp()
@@ -17,7 +18,7 @@ export default function Register() {
     email: '',
     phone: '',
     bloodGroup: 'O+',
-    city: 'Yaoundé',
+    city: '',
     address: '',
     password: '',
   })
@@ -72,6 +73,10 @@ export default function Register() {
             <label className="label">Phone</label>
             <input className="input" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+237 6XX XXX XXX" />
           </div>
+          <div>
+            <label className="label">City</label>
+            <CityInput value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} required />
+          </div>
           {role === 'donor' ? (
             <div>
               <label className="label">Blood group</label>
@@ -83,10 +88,6 @@ export default function Register() {
             </div>
           ) : (
             <>
-              <div>
-                <label className="label">City</label>
-                <input className="input" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} required />
-              </div>
               <div>
                 <label className="label">Hospital address</label>
                 <input className="input" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Street, neighbourhood" required />

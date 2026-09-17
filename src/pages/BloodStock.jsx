@@ -7,7 +7,7 @@ export default function BloodStock() {
   return (
     <div>
       <h1 className="page-title">Blood Stock</h1>
-      <p className="mt-1 text-sm text-muted">Live inventory snapshot across partner hospitals in Yaoundé.</p>
+      <p className="mt-1 text-sm text-muted">Live inventory snapshot across partner hospitals in Cameroon.</p>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {bloodStock.length === 0 ? (
           <div className="card p-6 text-sm text-muted sm:col-span-2 xl:col-span-4">

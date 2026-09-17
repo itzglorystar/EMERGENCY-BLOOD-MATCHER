@@ -49,7 +49,7 @@ export default function AdminHospitals() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="page-title">Hospitals</h1>
-          <p className="mt-1 text-sm text-muted">Verify new hospitals before they can use the requester portal.</p>
+          <p className="mt-1 text-sm text-muted">Verify new hospitals before they can use the hospital portal.</p>
         </div>
         <input
           className="input max-w-xs"
@@ -102,7 +102,7 @@ export default function AdminHospitals() {
                       <p>{hospital.email}</p>
                       <p className="text-xs text-muted">{hospital.phone || 'No phone'}</p>
                     </td>
-                    <td className="px-5 py-4">{hospital.city || 'Yaoundé'}</td>
+                    <td className="px-5 py-4">{hospital.city || '—'}</td>
                     <td className="px-5 py-4 text-muted">
                       {relativeTime(hospital.createdAt) || formatLongDate(hospital.createdAt)}
                     </td>

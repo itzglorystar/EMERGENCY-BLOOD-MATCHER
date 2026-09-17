@@ -11,7 +11,7 @@ export default function RoleToggle({ value, onChange }) {
         }`}
       >
         <Building2 className="h-4 w-4" />
-        Hospital / Requester
+        Hospital
       </button>
       <button
         type="button"

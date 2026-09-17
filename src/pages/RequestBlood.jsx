@@ -13,7 +13,7 @@ export default function RequestBlood() {
     patientName: '',
     bloodGroup: 'O+',
     units: 2,
-    hospital: user?.fullName || 'Yaoundé Central Hospital',
+    hospital: user?.fullName || '',
     urgency: 'High (Emergency)',
     neededBy: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString().slice(0, 16),
   })

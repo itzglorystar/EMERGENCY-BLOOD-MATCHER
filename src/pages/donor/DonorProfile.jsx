@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Avatar, BloodBadge, StatusPill } from '../../components/ui'
+import { Avatar, BloodBadge, CityInput, StatusPill } from '../../components/ui'
 import { useApp } from '../../context/AppContext'
 import { addMonths, formatLongDate } from '../../utils/roles'
 
@@ -31,6 +31,7 @@ export default function DonorProfile() {
     ['dateOfBirth', 'Date of Birth', 'date'],
     ['weight', 'Weight (kg)', 'number'],
     ['lastDonation', 'Last Donation', 'date'],
+    ['city', 'City', 'text'],
     ['emergencyContact', 'Emergency Contact', 'text'],
     ['address', 'Address', 'text'],
   ]
@@ -60,12 +61,16 @@ export default function DonorProfile() {
             <div key={key} className={key === 'address' ? 'md:col-span-2' : ''}>
               <label className="label">{label}</label>
               {editing ? (
-                <input
-                  className="input"
-                  type={type}
-                  value={form[key] ?? ''}
-                  onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                />
+                key === 'city' ? (
+                  <CityInput value={form[key] ?? ''} onChange={(e) => setForm({ ...form, [key]: e.target.value })} />
+                ) : (
+                  <input
+                    className="input"
+                    type={type}
+                    value={form[key] ?? ''}
+                    onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                  />
+                )
               ) : (
                 <div className="flex min-h-11 items-center rounded-xl bg-surface px-4 text-sm font-medium">
                   {key === 'dateOfBirth' ? formatLongDate(user.dateOfBirth) : key === 'lastDonation' ? formatLongDate(user.lastDonation) : key === 'weight' ? `${user.weight} kg` : user[key]}
