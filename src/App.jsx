@@ -1,10 +1,13 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
+import AdminLayout from './components/AdminLayout'
 import AppLayout from './components/AppLayout'
 import DonorLayout from './components/DonorLayout'
-import RequireRole, { RoleHome } from './components/RequireRole'
+import RequireRole, { RequireAuth, RoleHome } from './components/RequireRole'
 import { useApp } from './context/AppContext'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import HospitalPending from './pages/HospitalPending'
+import AccountBlocked from './pages/AccountBlocked'
 import Dashboard from './pages/Dashboard'
 import RequestBlood from './pages/RequestBlood'
 import MatchingDonors from './pages/MatchingDonors'
@@ -25,6 +28,10 @@ import DonorHistory from './pages/donor/DonorHistory'
 import DonorProfile from './pages/donor/DonorProfile'
 import DonorNotifications from './pages/donor/DonorNotifications'
 import DonorSettings from './pages/donor/DonorSettings'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminHospitals from './pages/admin/AdminHospitals'
+import AdminUsers from './pages/admin/AdminUsers'
+import AdminRequests from './pages/admin/AdminRequests'
 
 function DonorRedirect() {
   const { selectedDonorId, matchingDonors } = useApp()
@@ -55,7 +62,37 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route
+        path="/hospital/pending"
+        element={
+          <RequireRole role="hospital" allowInactive>
+            <HospitalPending />
+          </RequireRole>
+        }
+      />
+      <Route
+        path="/account-blocked"
+        element={
+          <RequireAuth>
+            <AccountBlocked />
+          </RequireAuth>
+        }
+      />
       <Route path="/" element={<RoleHome />} />
+
+      <Route
+        element={
+          <RequireRole role="admin">
+            <AdminLayout />
+          </RequireRole>
+        }
+      >
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/hospitals" element={<AdminHospitals />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/requests" element={<AdminRequests />} />
+      </Route>
 
       <Route
         element={

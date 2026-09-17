@@ -17,13 +17,15 @@ export default function Register() {
     email: '',
     phone: '',
     bloodGroup: 'O+',
+    city: 'Yaoundé',
+    address: '',
     password: '',
   })
 
   if (authLoading) {
     return <div className="grid min-h-screen place-items-center text-sm font-medium text-muted">Loading EBM…</div>
   }
-  if (isAuthenticated) return <Navigate to={homePath(user?.role)} replace />
+  if (isAuthenticated) return <Navigate to={homePath(user?.role, user?.accountStatus)} replace />
 
   const onSubmit = async (e) => {
     e.preventDefault()
@@ -35,6 +37,8 @@ export default function Register() {
       email: form.email,
       phone: form.phone,
       bloodGroup: form.bloodGroup,
+      city: form.city,
+      address: form.address,
       password: form.password,
     })
     setBusy(false)
@@ -46,7 +50,7 @@ export default function Register() {
       setError(created.error)
       return
     }
-    navigate(homePath(created.role))
+    navigate(homePath(created.role, created.accountStatus))
   }
 
   return (
@@ -77,7 +81,21 @@ export default function Register() {
                 ))}
               </select>
             </div>
-          ) : null}
+          ) : (
+            <>
+              <div>
+                <label className="label">City</label>
+                <input className="input" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} required />
+              </div>
+              <div>
+                <label className="label">Hospital address</label>
+                <input className="input" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Street, neighbourhood" required />
+              </div>
+              <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">
+                Hospital accounts stay pending until an EBM administrator verifies and approves them.
+              </p>
+            </>
+          )}
           <div>
             <label className="label">Password</label>
             <input type="password" className="input" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required minLength={6} />

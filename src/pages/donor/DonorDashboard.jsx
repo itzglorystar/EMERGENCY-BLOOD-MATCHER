@@ -14,8 +14,9 @@ export default function DonorDashboard() {
   const { user, donations, incomingRequests, setAvailability } = useApp()
   const available = user.available !== false
   const lastDonation = latestDonationOn(user, donations)
-  const nextEligibleDate = nextEligibleOn(user, lastDonation)
-  const eligibleNow = !nextEligibleDate || isOnOrBeforeToday(nextEligibleDate)
+  const nextEligibleDate = lastDonation ? nextEligibleOn(user, lastDonation) : null
+  const hasDonated = Boolean(lastDonation)
+  const waiting = hasDonated && nextEligibleDate && !isOnOrBeforeToday(nextEligibleDate)
   const unitsGiven = totalUnits(donations)
 
   return (
@@ -53,15 +54,15 @@ export default function DonorDashboard() {
         <StatCard
           icon={Calendar}
           label="Last Donation"
-          value={formatLongDate(lastDonation)}
-          subtitle={lastDonation ? 'Most recent unit' : 'No donation recorded yet'}
+          value={hasDonated ? formatLongDate(lastDonation) : '—'}
+          subtitle={hasDonated ? 'Most recent unit' : 'Never donated'}
           tone="blue"
         />
         <StatCard
           icon={Activity}
           label="Next Eligible"
-          value={eligibleNow ? 'Eligible now' : formatLongDate(nextEligibleDate)}
-          subtitle={lastDonation ? 'Last donation + 3 months' : 'No waiting period yet'}
+          value={!hasDonated ? '—' : waiting ? formatLongDate(nextEligibleDate) : 'Eligible now'}
+          subtitle={!hasDonated ? 'No donation recorded yet' : waiting ? 'Last donation + 3 months' : 'Waiting period complete'}
           tone="red"
         />
       </div>

@@ -1,5 +1,20 @@
-export function homePath(role) {
-  return role === 'donor' ? '/donor/dashboard' : '/dashboard'
+export function homePath(role, accountStatus) {
+  if (role === 'admin') return '/admin/dashboard'
+  if (role === 'donor') {
+    return accountStatus === 'suspended' ? '/account-blocked' : '/donor/dashboard'
+  }
+  if (role === 'hospital' && accountStatus && accountStatus !== 'active') {
+    return accountStatus === 'pending' ? '/hospital/pending' : '/account-blocked'
+  }
+  return '/dashboard'
+}
+
+export function accountStatusLabel(status) {
+  if (status === 'pending') return 'Pending review'
+  if (status === 'rejected') return 'Rejected'
+  if (status === 'suspended') return 'Suspended'
+  if (status === 'active') return 'Active'
+  return status || 'Active'
 }
 
 export function maskPatientName(fullName = '') {
@@ -54,7 +69,9 @@ export function totalUnits(records = []) {
 }
 
 export function latestDonationOn(user, donations = []) {
-  const dates = [user?.lastDonation, ...donations.map((item) => item.donatedOn)].filter(Boolean)
+  const dates = [user?.lastDonation, ...donations.map((item) => item.donatedOn)]
+    .map((value) => (parseDateOnly(value) ? String(value).slice(0, 10) : null))
+    .filter(Boolean)
   if (dates.length === 0) return null
   return dates.sort((a, b) => {
     const left = parseDateOnly(a)

@@ -23,6 +23,11 @@ export function mapProfile(row) {
     notes: row.notes || '',
     locationLabel: row.location_label || row.city,
     distanceKm: Number(row.distance_km ?? 3),
+    accountStatus: row.account_status || 'active',
+    verifiedAt: row.verified_at || '',
+    verifiedBy: row.verified_by || '',
+    rejectedReason: row.rejected_reason || '',
+    createdAt: row.created_at || '',
   }
 }
 
@@ -91,6 +96,7 @@ export function mapDonation(row) {
   return {
     id: row.id,
     ref: row.ref,
+    donorId: row.donor_id || null,
     donatedOn: row.donated_on,
     date: formatLongDate(row.donated_on),
     bloodGroup: row.blood_group,

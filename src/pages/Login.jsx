@@ -22,7 +22,7 @@ export default function Login() {
   if (authLoading) {
     return <div className="grid min-h-screen place-items-center text-sm font-medium text-muted">Loading EBM…</div>
   }
-  if (isAuthenticated) return <Navigate to={homePath(user?.role)} replace />
+  if (isAuthenticated) return <Navigate to={homePath(user?.role, user?.accountStatus)} replace />
 
   const switchRole = (next) => {
     setRole(next)
@@ -43,7 +43,7 @@ export default function Login() {
       setError(result.error || `Invalid ${role} credentials.`)
       return
     }
-    navigate(homePath(result.role || role))
+    navigate(homePath(result.role || role, result.accountStatus))
   }
 
   const onReset = async () => {
@@ -70,7 +70,17 @@ export default function Login() {
           <p className="mt-2 text-sm text-muted">Choose your portal, then sign in.</p>
 
           <form className="mt-8 space-y-4" onSubmit={onSubmit}>
-            <RoleToggle value={role} onChange={switchRole} />
+            {role === 'admin' ? (
+              <div className="rounded-2xl bg-ebm-50 px-4 py-3 text-sm">
+                <p className="font-semibold text-ebm-800">Administrator sign in</p>
+                <p className="mt-1 text-muted">Use the EBM admin account. Hospital and donor registration cannot create this role.</p>
+                <button type="button" className="mt-2 text-sm font-semibold text-ebm-700 hover:underline" onClick={() => switchRole('hospital')}>
+                  Back to hospital / donor portals
+                </button>
+              </div>
+            ) : (
+              <RoleToggle value={role} onChange={switchRole} />
+            )}
             <div>
               <label className="label" htmlFor="identifier">
                 Email
@@ -78,7 +88,7 @@ export default function Login() {
               <input
                 id="identifier"
                 className="input"
-                placeholder={role === 'hospital' ? 'hospital@email.com' : 'you@email.com'}
+                placeholder={role === 'admin' ? 'admin@email.com' : role === 'hospital' ? 'hospital@email.com' : 'you@email.com'}
                 value={form.identifier}
                 onChange={(e) => setForm({ ...form, identifier: e.target.value })}
                 autoComplete="username"
@@ -132,6 +142,13 @@ export default function Login() {
               Register
             </Link>
           </p>
+          {role !== 'admin' ? (
+            <p className="mt-3 text-center text-xs text-muted">
+              <button type="button" className="font-semibold text-ebm-700 hover:underline" onClick={() => switchRole('admin')}>
+                Administrator sign in
+              </button>
+            </p>
+          ) : null}
         </div>
       </section>
 

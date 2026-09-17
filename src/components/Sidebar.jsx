@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { BloodDropLogo } from './ui'
 
-export default function Sidebar({ open, onClose, items }) {
+export default function Sidebar({ open, onClose, items, footerNote }) {
   const { unreadCount, logout } = useApp()
 
   return (
@@ -50,9 +50,9 @@ export default function Sidebar({ open, onClose, items }) {
               >
                 <Icon className="h-4 w-4" />
                 <span className="flex-1">{item.label}</span>
-                {item.badge && unreadCount > 0 ? (
+                {item.badge && (item.badgeCount ?? unreadCount) > 0 ? (
                   <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-ebm-700">
-                    {unreadCount}
+                    {item.badgeCount ?? unreadCount}
                   </span>
                 ) : null}
               </NavLink>
@@ -61,6 +61,7 @@ export default function Sidebar({ open, onClose, items }) {
         </nav>
 
         <div className="p-3">
+          {footerNote}
           <button
             type="button"
             onClick={logout}

@@ -34,6 +34,7 @@ export function AppProvider({ children }) {
   const [donors, setDonors] = useState([])
   const [incomingRequests, setIncomingRequests] = useState([])
   const [bloodStock, setBloodStock] = useState([])
+  const [directory, setDirectory] = useState([])
   const [currentRequestId, setCurrentRequestId] = useState(flow.currentRequestId || null)
   const [selectedDonorId, setSelectedDonorId] = useState(flow.selectedDonorId || null)
   const [contactedDonorIds, setContactedDonorIds] = useState(flow.contactedDonorIds || [])
@@ -64,6 +65,40 @@ export function AppProvider({ children }) {
 
   const refreshData = useCallback(async (profile = userRef.current) => {
     if (!profile?.id) return
+
+    if (profile.role === 'admin') {
+      const [profileRes, reqRes, donRes, noteRes] = await Promise.all([
+        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+        supabase.from('blood_requests').select('*').order('created_at', { ascending: false }),
+        supabase.from('donations').select('*').order('donated_on', { ascending: false }),
+        supabase.from('notifications').select('*').eq('user_id', profile.id).order('created_at', { ascending: false }),
+      ])
+      setDirectory((profileRes.data || []).map(mapProfile))
+      setRequests((reqRes.data || []).map(mapRequest))
+      setDonations((donRes.data || []).map(mapDonation))
+      setNotifications((noteRes.data || []).map(mapNotification))
+      setDonors([])
+      setIncomingRequests([])
+      setBloodStock([])
+      return
+    }
+
+    setDirectory([])
+
+    if (profile.role === 'hospital' && profile.accountStatus !== 'active') {
+      const noteRes = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false })
+      setNotifications((noteRes.data || []).map(mapNotification))
+      setRequests([])
+      setDonations([])
+      setDonors([])
+      setIncomingRequests([])
+      setBloodStock([])
+      return
+    }
 
     if (profile.role === 'hospital') {
       const [reqRes, donRes, noteRes, donorRes, stockRes, contactRes] = await Promise.all([
@@ -132,6 +167,7 @@ export function AppProvider({ children }) {
         setDonors([])
         setIncomingRequests([])
         setBloodStock([])
+        setDirectory([])
         setAuthLoading(false)
         return
       }
@@ -192,12 +228,34 @@ export function AppProvider({ children }) {
         { event: '*', schema: 'public', table: 'blood_requests' },
         () => { refreshData(user) },
       )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
+        async () => {
+          try {
+            const profile = await loadProfile(user.id)
+            if (profile) {
+              setUser(profile)
+              refreshData(profile)
+            }
+          } catch (err) {
+            console.error(err)
+          }
+        },
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles' },
+        () => {
+          if (user.role === 'admin') refreshData(user)
+        },
+      )
       .subscribe()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [refreshData, user])
+  }, [refreshData, user, loadProfile])
 
   const login = async (identifier, password, selectedRole) => {
     const email = identifier.trim().toLowerCase()
@@ -217,8 +275,20 @@ export function AppProvider({ children }) {
     }
     setUser(profile)
     setSession(data.session)
+    if (profile.role === 'hospital' && profile.accountStatus === 'pending') {
+      setToast({ type: 'info', message: 'Your hospital is awaiting administrator approval.' })
+      return { ok: true, role: profile.role, accountStatus: profile.accountStatus }
+    }
+    if (profile.accountStatus === 'rejected') {
+      setToast({ type: 'error', message: 'This hospital account was not approved.' })
+      return { ok: true, role: profile.role, accountStatus: profile.accountStatus }
+    }
+    if (profile.accountStatus === 'suspended') {
+      setToast({ type: 'error', message: 'This account is suspended.' })
+      return { ok: true, role: profile.role, accountStatus: profile.accountStatus }
+    }
     setToast({ type: 'success', message: `Welcome back to EBM, ${profile.fullName}.` })
-    return { ok: true, role: profile.role }
+    return { ok: true, role: profile.role, accountStatus: profile.accountStatus }
   }
 
   const register = async (payload) => {
@@ -233,7 +303,8 @@ export function AppProvider({ children }) {
           phone: payload.phone || '',
           blood_group: payload.role === 'donor' ? payload.bloodGroup : null,
           gender: payload.gender || '',
-          city: 'Yaoundé',
+          city: payload.city || 'Yaoundé',
+          address: payload.address || '',
         },
       },
     })
@@ -242,15 +313,22 @@ export function AppProvider({ children }) {
       return {
         ok: true,
         needsConfirm: true,
+        pending: payload.role === 'hospital',
         role: payload.role,
-        error: 'Account created. Confirm your email, then sign in.',
+        error: payload.role === 'hospital'
+          ? 'Account created. Confirm your email, then wait for an administrator to verify this hospital.'
+          : 'Account created. Confirm your email, then sign in.',
       }
     }
     const profile = await loadProfile(data.user.id)
     setUser(profile)
     setSession(data.session)
+    if (profile?.role === 'hospital' && profile.accountStatus !== 'active') {
+      setToast({ type: 'info', message: 'Hospital submitted. An administrator must approve it before you can request blood.' })
+      return { ok: true, role: profile.role, accountStatus: profile.accountStatus, pending: true }
+    }
     setToast({ type: 'success', message: 'Account created. Welcome to EBM.' })
-    return { ok: true, role: profile?.role || payload.role }
+    return { ok: true, role: profile?.role || payload.role, accountStatus: profile?.accountStatus }
   }
 
   const sendPasswordReset = async (email) => {
@@ -290,6 +368,10 @@ export function AppProvider({ children }) {
   }
 
   const createRequest = async (form) => {
+    if (user?.accountStatus !== 'active') {
+      setToast({ type: 'error', message: 'Your hospital must be approved by an administrator first.' })
+      return null
+    }
     const { data, error } = await supabase
       .from('blood_requests')
       .insert({
@@ -433,6 +515,24 @@ export function AppProvider({ children }) {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
   }
 
+  const setAccountStatus = async (userId, status, reason = '') => {
+    const { data, error } = await supabase.rpc('admin_set_account_status', {
+      target_id: userId,
+      new_status: status,
+      reason: reason || null,
+    })
+    if (error) {
+      setToast({ type: 'error', message: error.message })
+      return { ok: false, error: error.message }
+    }
+    const updated = mapProfile(data)
+    setDirectory((prev) => prev.map((item) => (item.id === userId ? { ...item, ...updated } : item)))
+    const label = status === 'active' ? 'approved' : status
+    setToast({ type: 'success', message: `${updated.fullName || 'Account'} ${label}.` })
+    await refreshData(user)
+    return { ok: true, profile: updated }
+  }
+
   const value = {
     authLoading,
     isAuthenticated,
@@ -443,6 +543,7 @@ export function AppProvider({ children }) {
     notifications,
     incomingRequests,
     bloodStock,
+    directory,
     donors: role === 'hospital' ? donors : [],
     matchingDonors,
     currentRequest,
@@ -471,6 +572,8 @@ export function AppProvider({ children }) {
     respondToRequest,
     markAllNotificationsRead,
     markNotificationRead,
+    setAccountStatus,
+    refreshData,
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

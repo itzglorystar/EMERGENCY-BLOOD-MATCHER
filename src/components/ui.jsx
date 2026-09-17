@@ -28,6 +28,11 @@ export function StatusPill({ status }) {
     Low: 'bg-blue-50 text-blue-700 ring-blue-200',
     Adequate: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
     Critical: 'bg-red-50 text-ebm-700 ring-red-200',
+    Pending: 'bg-amber-50 text-amber-700 ring-amber-200',
+    'Pending review': 'bg-amber-50 text-amber-700 ring-amber-200',
+    Approved: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+    Rejected: 'bg-red-50 text-ebm-700 ring-red-200',
+    Suspended: 'bg-gray-100 text-gray-600 ring-gray-200',
   }
   const cls = map[status] || 'bg-gray-50 text-gray-600 ring-gray-200'
   return (
